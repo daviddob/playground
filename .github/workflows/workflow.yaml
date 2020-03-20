@@ -25,6 +25,7 @@ jobs:
           export KUBECONFIG=$GITHUB_WORKSPACE/.kubeconfig
           echo "Test"
           cat $KUBECONFIG | sha1sum
+          head -n 3 $KUBECONFIG
           kubectl get nodes
           echo "Test2"
           helmv3 -v 7 -n runbooks-staging upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/values.yml
