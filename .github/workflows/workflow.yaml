@@ -23,5 +23,6 @@ jobs:
           helmv3 repo add starkandwayne https://helm.starkandwayne.com
           helmv3 repo update
           export KUBECONFIG=$GITHUB_WORKSPACE/.kubeconfig
+          echo "Test"
           helmv3 -v 7 -n runbooks-staging upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/values.yml
           echo "Done"
