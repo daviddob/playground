@@ -4,29 +4,73 @@ on:
       - actions
 
 jobs:
-  build:
+  DeployStaging:
     name: Deploy Staging
     runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
       uses: actions/checkout@v2
 
-    - name: Save kubeconfig
+    - name: Save Kubeconfig
       env:
         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
       run: echo "$KUBE_CONFIG" > $GITHUB_WORKSPACE/.kubeconfig
 
-    - name: Run Kubernetes tools
+    - name: Setup Helm
       uses: stefanprodan/kube-tools@v1
       with:
         command: |
           helmv3 repo add starkandwayne https://helm.starkandwayne.com
           helmv3 repo update
-          export KUBECONFIG=$GITHUB_WORKSPACE/.kubeconfig
-          echo "Test"
-          cat $KUBECONFIG | sha1sum
-          head -n 3 $KUBECONFIG
-          kubectl get nodes
-          echo "Test2"
-          helmv3 -v 7 -n runbooks-staging upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/values.yml
-          echo "Done"
+
+    - name: Setup Helm
+      uses: stefanprodan/kube-tools@v1
+      env:
+        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+      with:
+        command: |
+          helmv3 -n runbooks-staging upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/staging-values.yml
+
+    - name: Smoke Test  
+      uses: stefanprodan/kube-tools@v1
+      env:
+        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+      with:
+        command: |
+          kubectl -n runbooks-staging rollout status deployment/runbooks-website
+
+  DeployProd:
+    name: Deploy Prod
+    needs: [DeployStaging]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+
+    - name: Save Kubeconfig
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      run: echo "$KUBE_CONFIG" > $GITHUB_WORKSPACE/.kubeconfig
+
+    - name: Setup Helm
+      uses: stefanprodan/kube-tools@v1
+      with:
+        command: |
+          helmv3 repo add starkandwayne https://helm.starkandwayne.com
+          helmv3 repo update
+
+    - name: Setup Helm
+      uses: stefanprodan/kube-tools@v1
+      env:
+        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+      with:
+        command: |
+          helmv3 -n runbooks-prod upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/prod-values.yml
+
+    - name: Smoke Test  
+      uses: stefanprodan/kube-tools@v1
+      env:
+        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+      with:
+        command: |
+          kubectl -n runbooks-prod rollout status deployment/runbooks-website
