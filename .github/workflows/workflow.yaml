@@ -14,7 +14,7 @@ jobs:
     - name: Save kubeconfig
       env:
         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-      run: echo $KUBE_CONFIG | base64 --decode > $GITHUB_WORKSPACE/.kubeconfig
+      run: echo "$KUBE_CONFIG" > $GITHUB_WORKSPACE/.kubeconfig
 
     - name: Run Kubernetes tools
       uses: stefanprodan/kube-tools@v1
