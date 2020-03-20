@@ -22,7 +22,6 @@ jobs:
         command: |
           helmv3 repo add starkandwayne https://helm.starkandwayne.com
           helmv3 repo update
-          export KUBECONFIG=$GITHUB_WORKSPACE/.kubeconfig
           echo "Test"
           cat $KUBECONFIG | sha1sum
           echo "Test2"
