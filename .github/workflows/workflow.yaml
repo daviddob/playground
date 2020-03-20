@@ -1,0 +1,26 @@
+on:
+  push:
+    branches:
+      - actions
+
+jobs:
+  build:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v2
+
+    - name: Save kubeconfig
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      run: echo $KUBE_CONFIG > $GITHUB_WORKSPACE/.kubeconfig
+
+    - name: Run Kubernetes tools
+      uses: stefanprodan/kube-tools@v1
+      with:
+        command: |
+          helmv3 repo add starkandwayne https://helm.starkandwayne.com
+          helmv3 repo update
+          export KUBECONFIG=$GITHUB_WORKSPACE/.kubeconfig
+          helmv3 -n runbooks-staging upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/values.yml
