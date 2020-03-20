@@ -26,7 +26,7 @@ jobs:
     - name: Deploy to K8s
       uses: stefanprodan/kube-tools@v1
       env:
-        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+        KUBECONFIG: ${{ github.workspace }}/.kubeconfig
       with:
         command: |
           helmv3 -n runbooks-staging upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/staging-values.yml
@@ -34,7 +34,7 @@ jobs:
     - name: Smoke Test  
       uses: stefanprodan/kube-tools@v1
       env:
-        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+        KUBECONFIG: ${{ github.workspace }}/.kubeconfig
       with:
         command: |
           kubectl -n runbooks-staging rollout status deployment/runbooks-website
@@ -62,7 +62,7 @@ jobs:
     - name: Deploy to K8s
       uses: stefanprodan/kube-tools@v1
       env:
-        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+        KUBECONFIG: ${{ github.workspace }}/.kubeconfig
       with:
         command: |
           helmv3 -n runbooks-prod upgrade --install runbooks starkandwayne/git-website -f $GITHUB_WORKSPACE/deployment/prod-values.yml
@@ -70,7 +70,7 @@ jobs:
     - name: Smoke Test  
       uses: stefanprodan/kube-tools@v1
       env:
-        KUBECONFIG: $GITHUB_WORKSPACE/.kubeconfig
+        KUBECONFIG: ${{ github.workspace }}/.kubeconfig
       with:
         command: |
           kubectl -n runbooks-prod rollout status deployment/runbooks-website
